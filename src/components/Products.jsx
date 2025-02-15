@@ -1,43 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./../styles/products.css";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('https://fakestoreapi.com/products')
-      .then((response) => {
-        setProducts(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError('Failed to load products. Please try again later.');
-        setLoading(false);
-      });
+    const fetchProducts = async () => {
+      try {
+        const token = localStorage.getItem("auth");
+        const response = await fetch("http://localhost:3000/products", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token for authentication
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("auth");
+    navigate("/login");
+  };
+
   return (
-    <Container className="mt-4">
-      <h2 className="text-center mb-4">Our Products</h2>
-      {loading && <Spinner animation="border" className="d-block mx-auto" />}
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Row>
-        {products.map((product) => (
-          <Col key={product.id} md={4} className="mb-4">
-            <Card className="h-100 shadow">
-              <Card.Img variant="top" src={product.image} style={{ height: '200px', objectFit: 'contain' }} />
-              <Card.Body>
-                <Card.Title>{product.title}</Card.Title>
-                <Card.Text>${product.price}</Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-    </Container>
+    <div className="products-page">
+      {/* Navbar */}
+      {/* <header className="navbar">
+        <h1 className="brand">ShopEase</h1>
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
+      </header> */}
+
+      {/* Products Section */}
+      <div className="products-container">
+        <h2 className="section-title">Explore Our Collection</h2>
+        <div className="products-grid">
+          {products.map((product) => (
+            <div key={product._id} className="product-card">
+              <img src={product.url} alt={product.name} className="product-image" />
+              <h3 className="product-title">{product.name}</h3>
+              <p className="product-price">${product.price.toFixed(2)}</p>
+              <button className="buy-btn">Buy Now</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 

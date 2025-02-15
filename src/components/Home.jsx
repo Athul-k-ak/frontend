@@ -1,18 +1,23 @@
-import React from 'react';
-import { Container, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./../styles/home.css";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check authentication on component mount
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []); // Runs only once when the component mounts
 
   return (
-    <Container className="text-center mt-5">
-      <h1>Welcome to Our eCommerce Store</h1>
+    <div className="home-container">
+      <h1>Welcome to Our eCommerce Platform</h1>
       <p>Find the best products at the best prices.</p>
-      <Button variant="primary" onClick={() => navigate('/products')}>
-        Shop Now
-      </Button>
-    </Container>
+    
+    </div>
   );
 };
 
